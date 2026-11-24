@@ -1,17 +1,26 @@
-# memi
+# memi — clean circular reaction edits
 
-Three Russian-language reaction memes, 1080×1920 H.264 MP4, 30 fps.
-Real CC0 reaction footage in Telegram-style circular crops over original animated voxel parkour backgrounds (not captured Minecraft gameplay).
+1080×1920, 30 fps, H.264/AAC. Actual parkour footage fills the screen. The source video is center-cropped into a 780 px circle in the upper-middle of the frame. No titles, text, frames, progress bars, or artificial gameplay. Original source audio is retained; optional licensed background music is mixed quietly.
 
-## Render
-On Ubuntu: install ffmpeg, python3, python3-pil, fonts-dejavu-core, then run `python3 render.py`.
-The GitHub Actions workflow renders all three and uploads them as an artifact.
-Outputs: `out/01-online.mp4`, `out/02-discord.mp4`, `out/03-sleep.mp4`.
+## Sources
+- Background reference: https://www.youtube.com/watch?v=u7kdVe8q5zs
+- Main source reference: https://www.youtube.com/watch?v=HdVirZO_860
+- Music reference: 09:03 in the main source. Track not yet identified; supply a licensed music file.
+- Editorial selection pending review of the source. No fabricated timestamps.
 
-## Source footage
-All reaction clips are marked CC0 on their respective Wikimedia Commons pages. Cropped, trimmed, and combined with original captions and graphics.
-- [Cat Jumpscare](https://commons.wikimedia.org/wiki/File:Cat_Jumpscare.webm), Panini!
-- [Howling Husky Dog](https://commons.wikimedia.org/wiki/File:Howling_Husky_Dog.webm), Klaudya Teodora
-- [Sophy the Cat is Really High On A Ledge](https://commons.wikimedia.org/wiki/File:Sophy_the_Cat_is_Really_High_On_A_Ledge.webm), PseudoSkull
+Use only media you are authorized to download and reuse. If the video host blocks CI downloads, use authorized direct media URLs or local files.
 
-Backgrounds and captions are generated locally. No music or external API keys required.
+## GitHub Actions
+Open Actions → Render source clips → Run workflow.
+1. Select transcribe mode. The workflow exports timestamped speech in transcript.txt and transcript.json for editorial selection.
+2. Review the actual moments. Select three nonoverlapping intervals, expressed in seconds.
+3. Run render mode, set clips to the three chosen intervals, and optionally provide a licensed music URL. Download the resulting MP4 files from Artifacts.
+
+## Local
+With Python and FFmpeg installed:
+```sh
+pip install faster-whisper
+python render.py transcribe --source source.mp4
+python render.py render --source source.mp4 --background parkour.mp4 --music music.wav --clips "START1-END1,START2-END2,START3-END3"
+```
+Replace the placeholders with reviewed numerical timestamps. Omit --music if no licensed track is available.
