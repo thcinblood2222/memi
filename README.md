@@ -1,26 +1,20 @@
-# memi — clean circular reaction edits
+# memi — night ambience edits
 
-1080×1920, 30 fps, H.264/AAC. Actual parkour footage fills the screen. The source video is center-cropped into a 780 px circle in the upper-middle of the frame. No titles, text, frames, progress bars, or artificial gameplay. Original source audio is retained; optional licensed background music is mixed quietly.
+Three vertical edits using the supplied meme compilation and Minecraft Starry Night Wave Ambience footage. The old synthetic gameplay and captions are no longer part of the renderer.
 
-## Sources
-- Background reference: https://www.youtube.com/watch?v=u7kdVe8q5zs
-- Main source reference: https://www.youtube.com/watch?v=HdVirZO_860
-- Music reference: 09:03 in the main source. Track not yet identified; supply a licensed music file.
-- Editorial selection pending review of the source. No fabricated timestamps.
+- 1080×1920, 30 fps, H.264/AAC
+- 0.6 s of background alone, followed by a 0.65 s circular-video fade
+- Soft shadow, thin progress bar, no added headings
+- Original meme audio with quieter background ambience
 
-Use only media you are authorized to download and reuse. If the video host blocks CI downloads, use authorized direct media URLs or local files.
+## Render locally
+Install FFmpeg and Pillow, then run:
+
+```sh
+python render.py --source "ТИК ТОК МЕМЫ ЧАСТЬ 60 [get-save.com].mp4" --background "Minecraft Starry Night Wave Ambience and Music relax and sleep [get-save.com].mp4"
+```
+
+The three MP4s are exported to out/. Source media and finished binary videos are not committed to Git.
 
 ## GitHub Actions
-Open Actions → Render source clips → Run workflow.
-1. Select transcribe mode. The workflow exports timestamped speech in transcript.txt and transcript.json for editorial selection.
-2. Review the actual moments. Select three nonoverlapping intervals, expressed in seconds.
-3. Run render mode, set clips to the three chosen intervals, and optionally provide a licensed music URL. Download the resulting MP4 files from Artifacts.
-
-## Local
-With Python and FFmpeg installed:
-```sh
-pip install faster-whisper
-python render.py transcribe --source source.mp4
-python render.py render --source source.mp4 --background parkour.mp4 --music music.wav --clips "START1-END1,START2-END2,START3-END3"
-```
-Replace the placeholders with reviewed numerical timestamps. Omit --music if no licensed track is available.
+The manual workflow accepts authorized direct MP4 links to the same two source files and exports the three clips as the night-memes artifact. Only reuse media you have permission to publish.
