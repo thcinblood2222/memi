@@ -1,0 +1,31 @@
+name: Render memes
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        meme: [01-online, 02-discord, 03-sleep]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg python3-pil fonts-dejavu-core
+      - name: Render
+        run: python3 render.py "${{ matrix.meme }}"
+      - name: Verify format
+        run: ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate -of json "out/${{ matrix.meme }}.mp4"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.meme }}
+          path: out/${{ matrix.meme }}.mp4
+          if-no-files-found: error
+          retention-days: 30
