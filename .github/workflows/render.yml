@@ -1,72 +1,38 @@
-name: Render source clips
+name: Render night ambience memes
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: "transcribe = inspect speech; render = export three selected clips"
-        type: choice
-        options: [transcribe, render]
-        default: transcribe
       source_url:
-        description: "Authorized source video URL or direct media URL"
-        default: "https://www.youtube.com/watch?v=HdVirZO_860"
+        description: "Authorized direct MP4 URL for the original meme compilation"
         required: true
       background_url:
-        description: "Parkour background URL"
-        default: "https://www.youtube.com/watch?v=u7kdVe8q5zs"
+        description: "Authorized direct MP4 URL for the supplied Minecraft night ambience"
         required: true
-      clips:
-        description: "Three start-end intervals in seconds, e.g. 12-28,45-59,90-108"
-        required: false
-      music_url:
-        description: "Optional licensed music URL (direct media or authorized download)"
-        required: false
+permissions:
+  contents: read
 jobs:
-  edit:
+  render:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - name: Install tools
+      - name: Install FFmpeg and Pillow
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg
-          pip install -U "yt-dlp[default]"
-      - name: Fetch authorized source
+          sudo apt-get install -y ffmpeg python3-pil
+      - name: Retrieve supplied files
         env:
           SOURCE: ${{ inputs.source_url }}
+          BACKGROUND: ${{ inputs.background_url }}
         run: |
           mkdir -p assets out
-          yt-dlp --no-playlist -f "bv*[height<=1080]+ba/b[height<=1080]/b" --merge-output-format mp4 --remux-video mp4 -o "assets/source.%(ext)s" "$SOURCE"
-      - name: Transcribe for editorial review
-        if: inputs.mode == 'transcribe'
-        run: |
-          pip install faster-whisper
-          python render.py transcribe --source assets/source.mp4
-      - name: Fetch background and music
-        if: inputs.mode == 'render'
-        env:
-          BACKGROUND: ${{ inputs.background_url }}
-          MUSIC: ${{ inputs.music_url }}
-        run: |
-          yt-dlp --no-playlist -f "bv*[height<=1080]/b[height<=1080]/b" --remux-video mp4 -o "assets/background.%(ext)s" "$BACKGROUND"
-          if [ -n "$MUSIC" ]; then
-            yt-dlp --no-playlist -x --audio-format wav -o "assets/music.%(ext)s" "$MUSIC"
-          fi
-      - name: Render selected edits
-        if: inputs.mode == 'render'
-        env:
-          CLIPS: ${{ inputs.clips }}
-        run: |
-          args=(render --source assets/source.mp4 --background assets/background.mp4 --clips "$CLIPS")
-          if [ -f assets/music.wav ]; then args+=(--music assets/music.wav); fi
-          python render.py "${args[@]}"
+          curl --fail --location --retry 3 --output assets/source.mp4 "$SOURCE"
+          curl --fail --location --retry 3 --output assets/background.mp4 "$BACKGROUND"
+      - name: Render
+        run: /usr/bin/python3 render.py --source assets/source.mp4 --background assets/background.mp4
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.mode }}-results
-          path: out/
+          name: night-memes
+          path: out/*.mp4
           if-no-files-found: error
           retention-days: 14
